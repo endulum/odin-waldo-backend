@@ -1,6 +1,4 @@
-## Express Template
-Personal template for starting Express projects.
+## Where's Waldo? API
+API backend for [Where's Waldo frontend.](https://github.com/endulum/odin-waldo-frontend/blob/HEAD/README.md)
 
-### Features
-- Code transpiling with Babel
-- Connection to MongoDB with Mongoose
+[Section](https://www.theodinproject.com/lessons/nodejs-where-s-waldo-a-photo-tagging-app)
