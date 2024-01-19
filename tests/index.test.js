@@ -1,7 +1,8 @@
 import request from 'supertest';
 import express from 'express';
+import createError from 'http-errors';
 
-import { router } from '../routes/index';
+import { router } from '../routes/map';
 import Map from '../models/map';
 import init from '../mongoConfigTesting';
 
@@ -24,34 +25,44 @@ beforeAll(async () => {
   })
 });
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use('/', router);
-
-test.only('index route works', done => {
-  request(app)
-    .get('/')
-    .expect('Content-Type', /json/)
-    .expect({ message: 'Hello World' })
-    .expect(200, done)
-});
+app.use(function (req, res, next) { next(createError(404)) });
+app.use(function (err, req, res, next) {
+  console.log(err.message);
+  res.locals.message = err.message;
+  res.status(err.status || 500).send(err);
+})
 
 describe('sending guesses and receiving feedback', () => {
+  test('error when guessing for a nonexistent map', done => {
+    request(app)
+      .post('/maps/woof')
+      .send({})
+      .expect('Map not found.')
+      .expect(404, done)
+  });
+
   test('incomplete guess', done => {
     request(app)
       .post('/maps/1')
       .type('form')
       .send({})
-      .expect([
-        {
-          path: 'x',
-          msg: 'X-coordinate is missing.'
-        }, {
-          path: 'y',
-          msg: 'Y-coordinate is missing.'
-        }, {
-          path: 'character',
-          msg: 'No character was specified.'
-        }
-      ])
+      .expect({
+        errors: [
+          {
+            path: 'x',
+            msg: 'X-coordinate must be a number.'
+          }, {
+            path: 'y',
+            msg: 'Y-coordinate must be a number.'
+          }, {
+            path: 'character',
+            msg: 'No character was specified.'
+          }
+        ]
+      })
       .expect(200, done)
   });
 
@@ -64,18 +75,20 @@ describe('sending guesses and receiving feedback', () => {
         y: 'Woof',
         character: 'Woof'
       })
-      .expect([
-        {
-          path: 'x',
-          msg: 'X-coordinate must be a number.'
-        }, {
-          path: 'y',
-          msg: 'Y-coordinate must be a number.'
-        }, {
-          path: 'character',
-          msg: 'This character does not exist in this map.'
-        }
-      ])
+      .expect({
+        errors: [
+          {
+            path: 'x',
+            msg: 'X-coordinate must be a number.'
+          }, {
+            path: 'y',
+            msg: 'Y-coordinate must be a number.'
+          }, {
+            path: 'character',
+            msg: 'This character does not exist in this map.'
+          }
+        ]
+      })
       .expect(200, done)
   });
 
