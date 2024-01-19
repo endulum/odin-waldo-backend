@@ -16,13 +16,25 @@ const MapSchema = new Schema({
       required: true
     },
 
-    x: {
+    xLeftBound: {
       type: Number,
       immutable: true,
       required: true
     },
 
-    y: {
+    xRightBound: {
+      type: Number,
+      immutable: true,
+      required: true
+    },
+
+    yUpperBound: {
+      type: Number, 
+      immutable: true,
+      required: true
+    },
+
+    yLowerBound: {
       type: Number, 
       immutable: true,
       required: true

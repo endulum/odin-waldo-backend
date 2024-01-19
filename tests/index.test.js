@@ -2,12 +2,26 @@ import request from 'supertest';
 import express from 'express';
 
 import { router } from '../routes/index';
+import Map from '../models/map';
 import init from '../mongoConfigTesting';
 
 const app = express();
 
 beforeAll(async () => {
   await init();
+
+  await Map.create({
+    mapId: '1',
+    characters: [
+      {
+        name: 'Waldo',
+        xLeftBound: 1367,
+        xRightBound: 1387,
+        yUpperBound: 636,
+        yLowerBound: 666
+      }
+    ]
+  })
 });
 
 app.use('/', router);
