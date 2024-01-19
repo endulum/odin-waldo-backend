@@ -41,6 +41,30 @@ describe('sending guesses and receiving feedback', () => {
       .expect(200, done)
   });
 
+  test('incorrectly-formatted guess', done => {
+    request(app)
+      .post('/maps/1')
+      .type('form')
+      .send({
+        x: 'Woof',
+        y: 'Woof',
+        character: 'Woof'
+      })
+      .expect([
+        {
+          path: 'x',
+          msg: 'X-coordinate must be a number.'
+        }, {
+          path: 'y',
+          msg: 'Y-coordinate must be a number.'
+        }, {
+          path: 'character',
+          msg: 'This character does not exist in this map.'
+        }
+      ])
+      .expect(200, done)
+  });
+
   test('wrong guess', done => {
     request(app)
       .post('/maps/1')
